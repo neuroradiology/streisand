@@ -10,19 +10,34 @@
 # bits.
 #
 
+# OpenConnect
+{{ ocserv_firewall_rule }}
+
 # OpenVPN
+{% if openvpn_firewall_rules is defined %}
 {% for rule in openvpn_firewall_rules %}
 {{ rule }}
 {% endfor %}
+{% endif %}
 
 # L2TP/IPsec
+{% if l2tp_ipsec_firewall_rules is defined %}
 {% for rule in l2tp_ipsec_firewall_rules %}
 {{ rule }}
 {% endfor %}
+{% endif %}
 
-/etc/init.d/dnsmasq start
-/etc/init.d/danted start
-/etc/init.d/ipsec restart
+# WireGuard
+{% if wireguard_firewall_rules is defined %}
+{% for rule in wireguard_firewall_rules %}
+{{ rule }}
+{% endfor %}
+{% endif %}
+
+ipsec setup start
+/etc/init.d/xl2tpd restart
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
 
 echo 0 | tee /proc/sys/net/ipv4/conf/*/*_redirects
 exit 0

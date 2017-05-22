@@ -45,21 +45,23 @@ You are now connected and have a SOCKS proxy up and running that is ready to for
 1. Go to the *Network* tab.
 1. Click the *Settings* button to *Configure how Firefox connects to the Internet*.
 1. Choose *Manual proxy configuration*.
-1. Enter `127.0.0.1` and Port `{{ shadowsocks_local_port }}` on the *SOCKS Host* line.
+1. Enter `127.0.0.1` and Port `{{ ssh_default_socks_port }}` on the *SOCKS Host* line.
+1. Select *Remote DNS*. This configures Firefox to send all DNS requests through the SOCKS proxy. This will protect you against DNS poisoning and ensure that false DNS entries cannot be used to censor your access.
 1. Click *OK*.
-1. Click *OK* again to close the Firefox preferences window. Now we need to configure Firefox to send all DNS requests through the SOCKS proxy. This will protect you against DNS poisoning and ensure that false DNS entries cannot be used to censor your access.
-1.  Type `about:config` into the address bar and hit Enter.
-1. You should see a screen that says *This might void your warranty!* Click *I'll be careful, I promise!*.
-1. Search for `socks_remote_dns` and double click on the value that is returned. It will change from *false* to *true*.
+1. Click *OK* again to close the Firefox preferences window.
 1. You should be good to go! You can verify that your traffic is being routed properly by [looking up your IP address on Google](https://encrypted.google.com/search?hl=en&q=ip%20address). It should say *Your public IP address is {{ streisand_ipv4_address }}*.
 
 <a name="linux-and-osx"></a>
 ### Linux and OS X (sshuttle) ###
-Sshuttle is a simple VPN tunnelling solution that operates over the SSH transport. It's fast, easy to set up, and offers great performance. Linux users should definitely try it first. However, sshuttle has not been updated since August 2012 and there are known bugs when running it on OS X Mavericks (10.9). In particular, some Mavericks users experience a connection hang and are not able to properly tunnel traffic. If you fall into this category, the [alternate SSH instructions](#linux-and-osx-alternate) will work for you.
+Sshuttle is a simple VPN tunnelling solution that operates over the SSH transport. It's fast, easy to set up, and offers great performance.
+
+[Alternate SSH instructions](#linux-and-osx-alternate) are also available if you would like to avoid installing additional software.
 
 1. Download the `streisand_rsa` private key that is used to authenticate the SSH connection:
    * [streisand\_rsa](/ssh/streisand_rsa)
 1. Copy the `streisand_rsa` file to the directory of your choice.
+1. Set the correct permissions on the RSA key file:
+   * `chmod 600 streisand_rsa`
 1. Add a new entry to your `.ssh/config` file. It should look like this. Port `443` is available as a fallback option if you are on a network that restricts access to the default SSH port. Be sure to adjust the location of the IdentityFile:
 
          Host {{ streisand_server_name }}
@@ -68,18 +70,19 @@ Sshuttle is a simple VPN tunnelling solution that operates over the SSH transpor
            HostName     {{ streisand_ipv4_address }}
            IdentityFile ~/.ssh/streisand_rsa
 
-1. Download [sshuttle](https://github.com/apenwarr/sshuttle) by running the following command in the directory of your choice:
+1. Download [sshuttle](https://github.com/sshuttle/sshuttle) by running the following command in the directory of your choice:
 
-  `git clone https://github.com/apenwarr/sshuttle.git`
+  `git clone https://github.com/sshuttle/sshuttle.git`
 
   * If access to GitHub has been blocked, you can download a mirrored copy [here](/mirror/#ssh)!
+  * sshuttle is also available via [Homebrew](http://brew.sh/) for OS X users: `brew install sshuttle`
 
 1. Enter the directory:
 
    `cd sshuttle`
 1. Run sshuttle and connect to the server:
 
-   `./sshuttle --dns -r forward@{{ streisand_server_name }} 0/0 -vv`
+   `./run --dns -r forward@{{ streisand_server_name }} 0/0 -vv`
 1. Verify that the fingerprint matches one of these:
 
    `{{ ssh_server_fingerprints.results[0].stdout }}`
@@ -89,7 +92,7 @@ Sshuttle is a simple VPN tunnelling solution that operates over the SSH transpor
 
 <a name="linux-and-osx-alternate"></a>
 ### Linux and OS X (alternate) ###
-Sshuttle offers significantly faster performance and is easier to set up, but the following instructions will also get you connected if you are in a situation where you cannot install sshuttle or it isn't working correctly due to an operating system incompatibility.
+Sshuttle offers significantly faster performance and is easier to set up, but the following instructions will also get you connected if you are in a situation where you cannot install sshuttle.
 
 1. Download the `streisand_rsa` private key that is used to authenticate the SSH connection:
    * [streisand\_rsa](/ssh/streisand_rsa)

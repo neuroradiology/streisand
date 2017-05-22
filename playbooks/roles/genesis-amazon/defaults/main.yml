@@ -1,11 +1,6 @@
 ---
-aws_debian7_california_ami_id: "ami-57333912"
-aws_debian7_ireland_ami_id: "ami-b4bb16c3"
-aws_debian7_oregon_ami_id: "ami-ed2864dd"
-aws_debian7_sao_paulo_ami_id: "ami-b100b5ac"
-aws_debian7_signapore_ami_id: "ami-881b3dda"
-aws_debian7_sydney_ami_id: "ami-ed264bd7"
-aws_debian7_tokyo_ami_id: "ami-dfa793de"
-aws_debian7_virginia_ami_id: "ami-d0318eb8"
-
-aws_instance_type: "t1.micro"
+aws_instance_type: "t2.micro"
+# Search AMIs owned by this owner. This is the Amazon owner ID.
+aws_ami_owner: "099720109477"
+# Find AMIs matching this name
+aws_ami_name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"

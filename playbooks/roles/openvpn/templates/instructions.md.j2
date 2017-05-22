@@ -31,6 +31,8 @@ For security reasons, OpenVPN clients typically have their own unique certificat
    * [{{ client }}](/openvpn/{{ client }}/{{ openvpn_direct_profile_filename }})
 {% endfor %}
    * *[Alternate profiles](#sslh-profiles) are available if you are on a network that only allows access to ports `80` and `443`.*
+   * *[UDP profiles](#udp-profiles) available.*
+   * *[Combined profiles](#combined-profiles) are now available.*
 1. Open the *config* directory that is located in the Destination Folder. For most users, this will either be in *C:\Program Files\OpenVPN\config* or *C:\Program Files (x86)\OpenVPN\config*. You will see a single README file in this directory.
 1. Drag and drop the downloaded `{{ openvpn_direct_profile_filename }}` file to this location alongside the README.
 1. Right-click on the OpenVPN icon in your taskbar and choose *Connect*.
@@ -40,17 +42,19 @@ For security reasons, OpenVPN clients typically have their own unique certificat
 <a name="osx"></a>
 ### OS X ###
 1. Download and open [Tunnelblick](/mirror/#openvpn).
-1. Click *Install*.
+1. Type your password to allow the installation process to complete, and click *OK*.
 1. Click *Launch* after the installation is finished.
-1. Enter your password and click *OK* if Tunnelblick asks to *Repair ownership/permissions*.
+1. Click *I have configuration files*.
 1. Download one of these unified OpenVPN profiles:
 {% for client in openvpn_clients %}
    * [{{ client }}](/openvpn/{{ client }}/{{ openvpn_direct_profile_filename }})
 {% endfor %}
    * *[Alternate profiles](#sslh-profiles) are available if you are on a network that only allows access to ports `80` and `443`.*
-1. Click the *Open configuration folder* button on the *Welcome to Tunnelblick* screen.
-1. Drag and drop the downloaded `{{ openvpn_direct_profile_filename }}` file to the folder that was opened. You may need to enter your password in order to authorize Finder to copy the file to this location.
-1. Look for the Tunnelblick icon in your menu bar. Click on it, and choose *Connect*. You will see an animation while the connection is being established. You can also click on the icon and choose *Details* to see a log of what is happening.
+   * *[UDP profiles](#udp-profiles) available.*
+   * *[Combined profiles](#combined-profiles) are now available.*
+1. Double-click the OpenVPN profile.
+1. You will be asked to choose whether the profile should be available for all users or only the current user. After making your selection, you will be asked to enter your password.
+1. Look for the Tunnelblick icon in your menu bar. Click on it, and choose *Connect*.
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address on Google](https://encrypted.google.com/search?hl=en&q=ip%20address). It should say *Your public IP address is {{ streisand_ipv4_address }}*.
 
 <a name="linux"></a>
@@ -65,7 +69,15 @@ For security reasons, OpenVPN clients typically have their own unique certificat
    * [{{ client }}](/openvpn/{{ client }}/{{ openvpn_direct_profile_filename }})
 {% endfor %}
    * *[Alternate profiles](#sslh-profiles) are available if you are on a network that only allows access to ports `80` and `443`.*
+   * *[UDP profiles](#udp-profiles) available.*
+   * *[Combined profiles](#combined-profiles) are now available.*
 1. Copy the downloaded `{{ openvpn_direct_profile_filename }}` file to the location of your choice. */etc/openvpn/* is a decent option.
+1. On some distributions, the pushed DHCP DNS option from the OpenVPN server will be ignored. This means that your DNS queries will still be routed through your ISP's servers which makes them vulnerable to what is known as a DNS leak.
+   * You can test whether or not your DNS is leaking [here](https://dnsleaktest.com/).
+   * You can ensure that the correct DNS servers are used by adding the following lines to the top of the `{{ openvpn_stunnel_profile_filename }}` file:
+     * `script-security 2`
+     * `up /etc/openvpn/update-resolv-conf`
+     * `down /etc/openvpn/update-resolv-conf`
 1. Execute OpenVPN, and pass it the .ovpn profile as an option.
 
    `sudo openvpn {{ openvpn_direct_profile_filename }}`
@@ -81,7 +93,7 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 {% endfor %}
 1. Install the OpenVPN plugin for NetworkManager.
 
-   `sudo apt-get install network-manager-openvpn`
+   `sudo apt-get install network-manager-openvpn-gnome`
 1. Open your *System Settings*.
 1. Click the *Network* icon.
 1. Click the *+* button in the lower-left of the window.
@@ -97,12 +109,15 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 1. Go to the *General* tab.
    * Check *Use custom gateway port* and enter `{{ openvpn_port }}` as its value.
      * Port `443` is available as an alternative if you are on a network that only allows access to the two standard HTTP ports.
+     * You can also use port `{{ openvpn_port_udp }}` for a UDP connection.
+     * A combined profile which cycles through UDP port `{{ openvpn_port_udp }}`, TCP port `{{ openvpn_port }}` and `{{ openvpn_port_sslh }}` is also available.
    * Check *Use LZO data compression*.
-   * Check *Use a TCP connection*.
+   * Check *Use a TCP connection* unless you have chosen to use the UDP port or the combined profile.
 1. Go to the *Security* tab.
    * Select `{{ openvpn_cipher }}` as the *Cipher*.
    * Select `{{ openvpn_auth_digest }}` as the *HMAC Authentication*.
 1. Go to the *TLS Authentication* tab.
+   * Under *Server Certificate Check* choose `verify name exactly` and enter `{{ openvpn_server_common_name.stdout }}` as its value. 
    * Check *Verify peer (server) certificate usage signature*.
    * Check *Use additional TLS authentication*.
      * Select the `ta.key` from the client-files directory for the *Key File*.
@@ -120,6 +135,8 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
    * [{{ client }}](/openvpn/{{ client }}/{{ openvpn_direct_profile_filename }})
 {% endfor %}
    * *[Alternate profiles](#sslh-profiles) are available if you are on a network that only allows access to ports `80` and `443`.*
+   * *[UDP profiles](#udp-profiles) available.*
+   * *[Combined profiles](#combined-profiles) are now available.*
 1. Copy the `{{ openvpn_direct_profile_filename }}` file to your phone.
 1. Launch OpenVPN for Android.
 1. Tap the folder icon in the lower-right of the screen.
@@ -129,17 +146,6 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 1. Accept the Android VPN connection warning.
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address on Google](https://encrypted.google.com/search?hl=en&q=ip%20address). It should say *Your public IP address is {{ streisand_ipv4_address }}*.
 
-Firefox for Android has a DNS resolution [bug](https://bugzilla.mozilla.org/show_bug.cgi?id=947801) that affects VPN users who are running Android 4.4. The following workaround ensures that lookups can be performed successfully, even if you remain connected to the OpenVPN server for an extended period of time.
-
-#### Configuring Firefox for Android to use the Dante SOCKS server ####
-1. Open Firefox.
-1. Type `about:config` into the address bar and tap the *Go* button on your keyboard.
-1. Type `proxy` into the search box.
-1. Set the value of *network.proxy.socks* to `10.8.0.1`.
-1. Set the value of *network.proxy.socks\_port* to `1080`.
-1. Set the value of *network.proxy.socks\_remote\_dns* to `true`.
-1. Set the value of *network.proxy.type* to `1`.
-
 <a name="ios"></a>
 ### iOS ###
 1. Download [OpenVPN Connect](https://itunes.apple.com/us/app/openvpn-connect/id590379981) and launch it.
@@ -148,6 +154,8 @@ Firefox for Android has a DNS resolution [bug](https://bugzilla.mozilla.org/show
    * [{{ client }}](/openvpn/{{ client }}/{{ openvpn_direct_profile_filename }})
 {% endfor %}
    * *[Alternate profiles](#sslh-profiles) are available if you are on a network that only allows access to ports `80` and `443`.*
+   * *[UDP profiles](#udp-profiles) available.*
+   * *[Combined profiles](#combined-profiles) are now available.*
 1. Open iTunes on your computer and connect your phone.
 1. Select your phone, click on the *Apps* tab, and find OpenVPN under the *File Sharing* section.
 1. Drag and drop the downloaded `{{ openvpn_direct_profile_filename }}` file into the file sharing window.
@@ -160,4 +168,16 @@ Firefox for Android has a DNS resolution [bug](https://bugzilla.mozilla.org/show
 ### Alternate unified profiles for access via port 443 ###
 {% for client in openvpn_clients %}
 * [{{ client }}](/openvpn/{{ client }}/{{ openvpn_sslh_profile_filename }})
+{% endfor %}
+
+<a name="udp-profiles"></a>
+### Alternate unified profiles for access via UDP port {{ openvpn_port_udp }} ###
+{% for client in openvpn_clients %}
+* [{{ client }}](/openvpn/{{ client }}/{{ openvpn_direct_udp_profile_filename }})
+{% endfor %}
+
+<a name="combined-profiles"></a>
+### Alternate profile that will cycle through UDP port {{ openvpn_port_udp }}, TCP port {{ openvpn_port }}, and TCP port {{ openvpn_port_sslh }} ###
+{% for client in openvpn_clients %}
+* [{{ client }}](/openvpn/{{ client }}/{{ openvpn_combined_profile_filename }})
 {% endfor %}

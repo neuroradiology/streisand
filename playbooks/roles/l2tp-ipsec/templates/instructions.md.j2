@@ -57,6 +57,7 @@ You can verify that your traffic is being routed properly by [looking up your IP
 1. Click *OK*.
 1. Check the *Show VPN status in menu bar* checkbox.
 1. Click the *Advanced* button and make sure the *Send all traffic over VPN connection* checkbox is selected.
+1. Click the *TCP/IP* tab, and make sure *Link-local only* is selected in the *Configure IPv6* section.
 1. Click *OK* to close the Advanced settings, and then click *Apply* to save the VPN connection information.
 
 You can connect to the VPN using the VPN icon in the menu bar, or by selecting the VPN in the Network section of System Preferences and choosing *Connect*. You can verify that your traffic is being routed properly by [looking up your IP address on Google](https://encrypted.google.com/search?hl=en&q=ip%20address). It should say *Your public IP address is {{ streisand_ipv4_address }}*.
@@ -93,14 +94,15 @@ L2TP/IPsec connections are not supported out-of-the-box on most Linux distributi
 <a name="ios"></a>
 ### iOS ###
 1. Go to Settings -> General -> VPN.
-1. Tap *Add VPN Configuration*.
-1. Select the *L2TP* tab.
+1. Tap *Add VPN Configuration...*.
+1. Tap *Type*.
+1. Select *L2TP* and go back.
 1. Tap *Description* and enter `{{ streisand_server_name }}`.
 1. Tap *Server* and enter `{{ streisand_ipv4_address }}`.
 1. Tap *Account* and enter `streisand`.
 1. Tap *Password* and enter `{{ chap_password.stdout }}`.
 1. Tap *Secret* and enter `{{ ipsec_preshared_key.stdout }}`.
-1. Tap *Save*.
+1. Tap *Done*.
 1. Slide the *VPN* switch on.
 1. Once connected, you will see a VPN icon in the status bar. You can verify that your traffic is being routed properly by [looking up your IP address on Google](https://encrypted.google.com/search?hl=en&q=ip%20address). It should say *Your public IP address is {{ streisand_ipv4_address }}*.
 
