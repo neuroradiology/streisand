@@ -1,12 +1,6 @@
 ---
-streisand_ci: true
-
-streisand_client_test: false
+streisand_ci: yes
 streisand_noninteractive: no
-
-upstream_dns_servers:
-  - 8.8.8.8
-  - 8.8.4.4
 
 server_name: streisand
 
@@ -25,5 +19,6 @@ libreswan_compilation_dependencies_trusty:
   - libselinux1-dev
   - libsystemd-daemon-dev
   - libunbound-dev
+  - libldns-dev
   - make
   - pkg-config

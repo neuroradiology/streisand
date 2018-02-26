@@ -48,7 +48,7 @@
   command: make install
   args:
     chdir: "{{ shadowsocks_compilation_directory }}"
-    creates: "/usr/local/bin/ss-server"
+    creates: "/usr/bin/ss-server"
 
 - name: Create the shadowsocks-libev config directory
   file:
@@ -91,14 +91,10 @@
 - name: Register Shadowsocks password
   command: cat {{ shadowsocks_password_file }}
   register: shadowsocks_password
+  changed_when: False
 
-- name: Copy the Shadowsocks password file locally
-  fetch:
-    src: "{{ shadowsocks_password_file }}"
-    dest: "{{ shadowsocks_password_file_localpath }}"
-    fail_on_missing: yes
-    flat: yes
-  when: streisand_client_test
+# Add simple-obfs task file
+- import_tasks: simple-obfs.yml
 
 - name: Generate Shadowsocks config file
   template:
@@ -114,31 +110,32 @@
     enabled: yes
     state: started
 
-- name: Ensure the Shadowsocks service is started
-  wait_for:
-    host: "{{ streisand_ipv4_address }}"
-    port: "{{ shadowsocks_server_port }}"
-    state: started
-    timeout: 60
+# For some providers (e.g. GCE/AWS) the streisand_ipv4_address != the
+# ansible_default_ipv4.address, and the Shadowsocks service is bound to the
+# latter instead of the former. We check both, tolerating errors checking the
+# former. This mess should probably be addressed in a more forward facing
+# manner.
+- block:
+    - name: "Check that the Shadowsocks service started ({{ streisand_ipv4_address }})"
+      wait_for:
+        host: "{{ streisand_ipv4_address }}"
+        port: "{{ shadowsocks_server_port }}"
+        state: started
+        timeout: 30
+      ignore_errors: yes
+  rescue:
+    - name: "Check that the Shadowsocks service started ({{ ansible_default_ipv4.address }})"
+      wait_for:
+        host: "{{ ansible_default_ipv4.address }}"
+        port: "{{ shadowsocks_server_port }}"
+        state: started
+        timeout: 30
 
-- name: Create the Shadowsocks Gateway directory
-  file:
-    path: "{{ shadowsocks_gateway_location }}"
-    owner: www-data
-    group: www-data
-    mode: 0750
-    state: directory
+# Apply the Shadowsocks firewall rules
+- import_tasks: firewall.yml
 
-- name: Generate the Markdown Shadowsocks instructions
-  template:
-    src: instructions.md.j2
-    dest: "{{ shadowsocks_markdown_instructions }}"
+# Generate the Shadowsocks gateway docs & client QR code
+- import_tasks: docs.yml
 
-- name: Convert the Markdown Shadowsocks instructions into HTML and surround them with the header and footer template
-  shell: markdown {{ shadowsocks_markdown_instructions }} | cat {{ streisand_header_template }} - {{ streisand_footer_template }} > {{ shadowsocks_html_instructions }}
-
-- name: Generate the Shadowsocks QR code
-  # The ss:// URI format is documented here:
-  #   http://shadowsocks.org/en/config/quick-guide.html
-  shell: echo -n '{{ shadowsocks_encryption_method }}:{{ shadowsocks_password.stdout }}@{{ streisand_ipv4_address }}:{{ shadowsocks_server_port }}' | base64 --wrap=0 | sed 's/^/ss:\/\//' | qrencode -s 8 -o {{ shadowsocks_qr_code }}
-
+# Mirror the Shadowsocks clients
+- import_tasks: mirror.yml

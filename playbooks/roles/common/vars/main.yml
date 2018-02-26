@@ -30,13 +30,69 @@ streisand_common_packages:
   - qrencode
   # Used for automatically installing security updates
   - unattended-upgrades
-  # Word List dictionary used by several roles to generate random
-  # (yet typeable!) passphrases
-  - wamerican-huge
+  # A UUID generator with an explicit random function.
+  # Used for generating UUIDs for mobileconfig files
+  - uuid
+
+# Services that are running by default but not needed by Streisand
+streisand_unneeded_packages:
+  - lxd
+  - snapd
 
 streisand_gateway_location: "/var/www/streisand"
+
+streisand_mirror_location: "{{ streisand_gateway_location }}/mirror"
 
 streisand_local_directory: "generated-docs"
 
 streisand_header_template: "/tmp/header.html"
 streisand_footer_template: "/tmp/footer.html"
+streisand_language_selector: "/tmp/languages.html"
+streisand_i18n_header_template: "/tmp/headeri18n.html"
+
+# By default concurrent executions of `iptables` will fail immediately if unable
+# to acquire a lock. We use the `--wait` argument to instead specify a maximum
+# number of seconds to wait before failing. This allows multiple services to add
+# iptables rules at once. See Issue #950 for longer term ideas on how to make
+# this var not required.
+streisand_iptables_wait: 120
+
+# Internationalization
+streisand_languages:
+  en:
+    file_suffix: ""
+    language_name: "English"
+    tor_locale: "en-US"
+  fr:
+    file_suffix: "-fr"
+    language_name: "Français"
+    tor_locale: "fr"
+
+streisand_word_gen:
+  gateway:
+    shuf -n 6 /usr/share/dict/english.txt |
+    paste -s -d '.' -
+  identifier:
+    shuf -n 2 /usr/share/dict/english.txt |
+    paste -s -d '-' -
+  # Tor only likes [A-Za-z0-9] for nicknames.
+  #
+  # The BIP words are maximum 8 characters, so we get two safely.
+  #
+  # Tor nicknames should be 19 characters or fewer; cut ours off at 18.
+  #
+  # Caps script from https://www.unix.com/302904939-post2.html
+  tor_nickname:
+    shuf -n 2 /usr/share/dict/english.txt |
+    awk '{OFS=""; for(j=1;j<=NF;j++){ $j=toupper(substr($j,1,1)) substr($j,2) }}1' |
+    tr -d '\n' |
+    cut -b 1-18
+  long_identifier:
+    shuf -n 3 /usr/share/dict/english.txt |
+    paste -s -d '-' -
+  weak_password:
+    shuf -n 3 /usr/share/dict/english.txt |
+    paste -s -d '.' -
+  psk:
+    shuf -n 5 /usr/share/dict/english.txt |
+    paste -s -d '.' -
