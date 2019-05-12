@@ -1,4 +1,6 @@
-![Streisand Logo](https://raw.githubusercontent.com/jlund/streisand/master/logo.jpg "Automate the effect")
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jlund/streisand/master/logo.jpg" alt="Automate the effect"/> 
+</p>
 
 - - -
 [English](README.md), [Français](README-fr.md), [简体中文](README-chs.md), [Русский](README-ru.md) | [Miroir](https://gitlab.com/alimakki/streisand)
@@ -25,27 +27,22 @@ Présentation de Streisand
 
 Plus de fonctionnalités
 -----------------------
-* Nginx alimente la passerelle protégée par mot de passe et cryptée qui sert de point de départ pour les nouveaux utilisateurs. La passerelle est accessible via SSL, ou comme [service caché](https://www.torproject.org/docs/hidden-services.html.en) Tor.
+* Nginx alimente la passerelle protégée par mot de passe et chiffrée qui sert de point de départ pour les nouveaux utilisateurs. La passerelle est accessible via SSL, ou comme [service caché](https://www.torproject.org/docs/hidden-services.html.en) Tor.
   * Instructions belles, personnalisées, et étape par étape, les configurations du client sont générées pour chaque nouveau serveur que Streisand crée. Les utilisateurs peuvent accéder rapidement à ces instructions via n'importe quel navigateur Web. Les instructions sont réactives et fantastiques sur les téléphones mobiles.
   * L'intégrité du logiciel mis en miroir est assurée en utilisant les sommes de contrôle SHA-256 ou en vérifiant les signatures GPG si le projet les fournit. Cela protège les utilisateurs contre le téléchargement de fichiers corrompus.
   * Tous les fichiers auxiliaires, tels que les profils de configuration OpenVPN, sont également disponibles via la passerelle.
   * Les utilisateurs actuels de Tor peuvent profiter des services supplémentaires que Streisand met en place pour transférer des fichiers volumineux ou pour traiter d'autres types de trafic (par exemple BitTorrent) qui ne sont pas appropriés pour le réseau Tor.
   * Un mot de passe unique, un certificat SSL et une clé privée SSL sont générés pour chaque passerelle Streisand. Les instructions de la passerelle et le certificat sont transférés via SSH à la fin de l'exécution de Streisand.
 * Des services distincts et des daemons multiples offrent une énorme flexibilité. Si une méthode de connexion est bloquée, il existe de nombreuses options disponibles, dont la plupart sont résistantes à l'inspection des paquets en profondeur.
-  * Toutes les méthodes de connexion (y compris L2TP/IPsec et connexions directes OpenVPN) sont efficaces contre le type de blocage avec lequel la Turquie a expérimenté.
+  * Toutes les méthodes de connexion (y compris les connexions directes OpenVPN) sont efficaces contre le type de blocage avec lequel la Turquie a expérimenté.
   * OpenConnect/AnyConnect, OpenSSH, OpenVPN (enveloppé dans stunnel), Shadowsocks, Tor (avec obfsproxy et obfs4 transports enfichables), et WireGuard sont tous actuellement efficace contre le grand pare-feu de la Chine.
 * Chaque tâche a été bien documentée et a donné une description détaillée. Streisand est simultanément le HOWTO le plus complet en existance pour l'installation de tous les logiciels qu'il installe, et aussi l'antidote pour avoir à faire jamais tout cela à la main de nouveau.
 * Tous les logiciels fonctionnent sur des ports qui ont été délibérément choisis pour rendre le blocage de ports simpliste irréaliste sans causer de dommages collatéraux massifs. OpenVPN, par exemple, ne fonctionne pas sur le port défaut de 1194, mais utilise le port standard 636 pour les connexions LDAP/SSL qui sont aimés par des entreprises du monde entier.
-  * *L2TP/IPsec est une exception notable à cette règle car les ports ne peuvent pas être modifiés sans rompre la compatibilité du client*
 
 <a name="services-provided"></a>
 Services fournis
 ----------------
-* L2TP/IPsec en utilisant [Libreswan](https://libreswan.org/) et [xl2tpd](https://www.xelerance.com/software/xl2tpd/)
-  * Une clé et un mot de passe pré-partagés choisis au hasard sont générés.
-  * Les utilisateurs Windows, macOS, Android et iOS peuvent tous se connecter en utilisant le support VPN natif intégré à chaque système d'exploitation sans installer de logiciel supplémentaire.
-* [Monit](https://mmonit.com/monit/)
-  * Surveille la santé du processus et redémarre automatiquement les services dans le cas improbable où ils se plante ou ne répondent pas.
+
 * [OpenSSH](https://www.openssh.com/)
   * Les tunnels Windows et Android SSH sont également pris en charge et une copie des clés sont exportée dans le format .ppk que PuTTY requiert.
   * [Tinyproxy](https://banu.com/tinyproxy/) est installé et lié à localhost. Il peut être accédé sur un tunnel SSH par des programmes qui ne prennent pas en charge nativement SOCKS et qui nécessitent un proxy HTTP, comme Twitter pour Android.
@@ -97,78 +94,51 @@ Effectuez toutes ces tâches sur votre machine locale.
 
 * Streisand nécessite un système BSD, Linux ou macOS. À partir de maintenant, Windows n'est pas soutenu. Toutes les commandes suivantes doivent être exécutées à l'intérieur d'une session Terminal.
 * Python 2.7 est nécessaire. Cela est standard sur macOS, et est la valeur par défaut sur presque toutes les distributions Linux et BSD. Si votre distribution emploie Python 3 à la place, vous devrez installer la version 2.7 pour que Streisand fonctionne correctement.
-* Assurez-vous qu'une clé SSH est présente dans ~/.ssh/id\_rsa.pub.
-  * Les clés SSH constituent une alternative plus sécurisé aux mots de passe qui vous permettent de prouver votre identité à un serveur ou à un service basé sur la cryptographie à clé publique.
-  * Pour vérifier si vous avez déjà une clé SSH, entrez la commande suivante à l'invite de commande.
+* Assurez-vous qu'une clé publique SSH est présente dans ~/.ssh/id\_rsa.pub.
+  * Les clés SSH constituent une alternative plus sécurisé aux mots de passe qui vous permettent de prouver votre identité à un serveur ou à un service basé sur la cryptographie à clé publique. Fondamentalement, la clé publique est quelque chose que vous pouvez partager aux autres, alors que la clé privée doit être gardée secrète (comme un mot de passe).
+  * Pour vérifier si vous avez déjà une clé publique SSH, entrez la commande suivante à l'invite de commande.
 
         ls ~/.ssh
-  * Si vous voyez un fichier id_rsa.pub, vous avez une clé SSH.
-  * Si vous n'avez pas de clé SSH, vous pouvez en générer une en utilisant cette commande et en suivant les valeurs par défaut:
+  * Si vous voyez un fichier id_rsa.pub, vous avez une clé publique SSH.
+  * Si vous n'avez pas de paire de clés SSH, vous pouvez en générer une en utilisant cette commande et en suivant les valeurs par défaut:
 
         ssh-keygen
   * Si vous souhaitez utiliser une clé SSH avec un nom différent ou dans un emplacement non standard, veuillez entrer 'oui' lorsqu'on vous demande si vous souhaitez personnaliser votre instance lors de l'installation.
+  * **Notez**: Vous aurez besoin de ces clés pour accéder à votre instance Streisand via SSH. Conservez-les pour la durée de vie de votre serveur Streisand.
 * Installez Git.
   * Sur Debian et Ubuntu
 
             sudo apt-get install git
-  * Sur Fedora
+  * Sur Fedora 27, certains progiciels sont nécessaires plus tard
 
-            sudo yum install git
-  * Sur macOS (via [Homebrew](https://brew.sh/))
+          sudo dnf install git python2-pip gcc python2-devel python2-crypto python2-pycurl libcurl-devel
+  * Sur CentOS 7, `pip` est disponible dans le dépôt EPEL; certains progiciels supplémentaires sont nécessaires plus tard.
 
-            brew install git
-* Installez le système de gestion de paquets [pip](https://pip.pypa.io/en/latest/) pour Python.
-  * Sur Debian et Ubuntu (installe également les dépendances qui sont nécessaires pour construire Ansible et qui sont requises par certains modules)
+          sudo yum -y update && sudo yum install -y epel-release
+          sudo yum -y update && sudo yum install -y git gcc python-devel python-crypto python-pycurl python-pip libcurl-devel
+  * Sur macOS, `git` fait partie des outils de développement et sera installé la première fois que vous l'exécuterez. S'il n'y a pas déjà une commande `pip` installée, installez-la avec:
 
-            sudo apt-get install python-paramiko python-pip python-pycurl python-dev build-essential
-  * Sur Fedora
-
-            sudo yum install python-pip
-  * Sur macOS
-
-            sudo easy_install pip
-            sudo pip install pycurl
-
-* Installez [Ansible](https://www.ansible.com/).
-  * Sur macOS (via [Homebrew](https://brew.sh/))
-
-            brew install ansible
-  * Sur BSD ou Linux (via pip)
-
-            sudo pip install ansible markupsafe
-* Installez les bibliothèques Python nécessaires pour votre fournisseur de cloud.
-  * Amazon EC2
-
-            sudo pip install boto boto3
-  * Azure
-
-            sudo pip install ansible[azure]
-  * DigitalOcean
-
-            sudo pip install dopy==0.3.5
-  * Google
-
-            sudo pip install "apache-libcloud>=0.17.0"
-  * Linode
-
-            sudo pip install linode-python
-  * Rackspace Cloud
-
-            sudo pip install pyrax
-  * Si vous utilisez une version de Python installée avec Homebrew, vous devez également exécuter ces commandes pour vous assurer qu'il peut trouver les bibliothèques nécessaires:
-
-            mkdir -p ~/Library/Python/2.7/lib/python/site-packages
-            echo '/usr/local/lib/python2.7/site-packages' > ~/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+         sudo python2.7 -m ensurepip
 
 ### Exécution ###
 1. Clonez le répertoire Streisand et entrez dans le répertoire.
 
         git clone https://github.com/StreisandEffect/streisand.git && cd streisand
-2. Exécuter le script Streisand.
+
+2. Exécutez le programme d'installation pour Ansible et ses dépendances.
+
+        ./util/venv-dependencies.sh ./venv
+    * Le programme d'installation détectera les progiciels manquants et imprimera les commandes nécessaires pour les installer.
+
+3. Activez les progciels Ansible installés.
+
+        source ./venv/bin/activate
+      
+4. Exécutez le script Streisand.
 
         ./streisand
-3. Suivez les instructions pour choisir votre fournisseur, la région physique du serveur, et son nom. Vous serez également invité à entrer les informations de l'API.
-4. Une fois les informations de connexion et les clés d'API saisies, Streisand commencera à faire tourner un nouveau serveur distant.
+5. Suivez les instructions pour choisir votre fournisseur, la région physique du serveur, et son nom. Vous serez également invité à entrer les informations de l'API.
+6. Une fois les informations de connexion et les clés d'API saisies, Streisand commencera à faire tourner un nouveau serveur distant.
 5. Attendez que l'installation soit terminée (cela prend habituellement environ dix minutes) et recherchez les fichiers correspondants dans le dossier 'generated-docs' dans le répertoire du dépôt Streisand. Le fichier HTML expliquera comment se connecter à la passerelle via SSL ou via le service caché Tor. Toutes les instructions, les fichiers, les clients en miroir et les clés du nouveau serveur se trouvent alors sur la passerelle. Vous avez fini!
 
 ### Installation de Streisand sur localhost (Avancé) ###
@@ -181,7 +151,7 @@ Si vous ne pouvez pas exécuter Streisand de la manière normale (à partir de v
 
 Vous pouvez également exécuter Streisand sur un nouveau serveur Ubuntu 16.04. Serveur dédié? Génial! Fournisseur de cloud ésotérique? Fantastique! Pour ce faire, choisissez simplement `Existing server (Advanced)` dans le menu après avoir exécuté `./streisand` et fournissez l'adresse IP du serveur existant lorsque vous y êtes invité.
 
-Le serveur doit être accessible en utilisant la clé SSH `$HOME/id_rsa`, avec **root** comme utilisateur de connexion par défaut. Si votre fournisseur vous demande un utilisateur SSH au lieu de `root` (par exemple, `ubuntu`), spécifiez la variable environnementale `ANSIBLE_SSH_USER` (par exemple `ANSIBLE_SSH_USER=ubuntu`) lorsque vous exécutez `./streisand`.
+Le serveur doit être accessible en utilisant la clé SSH `$HOME/.ssh/id_rsa`, avec **root** comme utilisateur de connexion par défaut. Si votre fournisseur vous demande un utilisateur SSH au lieu de `root` (par exemple, `ubuntu`), spécifiez la variable environnementale `ANSIBLE_SSH_USER` (par exemple `ANSIBLE_SSH_USER=ubuntu`) lorsque vous exécutez `./streisand`.
 
 **Note:** L'installation de Streisand sur localhost peut être une action destructive! Vous pourriez potentiellement écraser des fichiers de configuration; vous devez être certain que vous affectez la machine correcte.
 

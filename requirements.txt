@@ -5,7 +5,16 @@
 # If you have problems running this, try the util/venv-builder.sh script.
 
 # Core with Azure dependencies
-ansible[azure]
+#
+ansible[azure]==2.6.5
+
+# Multiple packages depend on SecretStorage, and versions >= 3 require
+# Python 3. Until we're ready for Python 3, specify the earlier rev.
+#
+# If we end up pinning more package versions, we should consider using
+# pip constraints files instead of forcing installation.
+#
+SecretStorage<3.0
 
 # AWS
 boto
@@ -17,9 +26,10 @@ dopy==0.3.5
 
 # Google Compute Engine
 apache-libcloud>=1.17.0
+pycryptodome
 
 # Linode
-pycurl
+pycurl==7.43.0.1
 linode-python
 
 # Rackspace

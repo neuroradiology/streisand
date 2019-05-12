@@ -16,26 +16,21 @@ quiet=
 
 usage () {
        echo "
-Usage: $0 new-directory
+Usage: $0 ./venv
 
-This script installs Streisand builder dependencies into an isolated
-Python virtualenv. A virtualenv is one of the most reliable ways of
-avoiding version clashes, and is especially recommended for people
-having problems with initial Streisand installs.
+This script creates an isolated Python virtualenv at './venv', and
+installs Ansible and dependencies into it.
 
-Note that this script is not guaranteed to work for localhost
-deployments. This will be fixed in a later release.
+The script depends on Python 2.7, and on a functional 'pip' command.
+This script can install 'virtualenv' for you, but this may require
+sudo/root access.
 
-It depends on Python 2.7, and on a pip command functional enough to
-install virtualenv.  If this is a system running Debian or Ubuntu,
-this script will also check for other packages needed to install.
+If this system is running Debian or Ubuntu, this script will also
+check for other packages needed to install.
 
-This script can install virtualenv for you, but on Linux, this
-requires sudo/root access.
-
-'new-directory' must be somewhere you can write to. A good place may be
-$HOME/streisand-deps. If it already exists,
-please delete the directory, or use a different name.
+Although './venv' is recommended, you can specify another location to
+create the virtualenv. If the location already exists, it should be an
+existing virtualenv to overwrite.
 
 "
 }
@@ -60,12 +55,12 @@ if [ "$#" -ne 1 ]; then
    invocation_problems=1
 fi
 
-# Some systems have a pip2 but no pip.
+# Some systems have a pip2.7 but no pip.
 PIP="pip"
 
 if ! "$PIP" --version >/dev/null 2>&1; then
-    echo "could not find pip, trying pip2"
-    PIP="pip2"
+    echo "could not find pip, trying pip2.7"
+    PIP="pip2.7"
 fi
 
 # Hopefully $PIP should be pointing at an appropriate executable name.
@@ -75,10 +70,10 @@ if "$PIP" --version 2>/dev/null | grep -q 'python 3'; then
     echo "
 
 On your system, 'pip' appears to invoke Python 3's pip. This might cause problems.
-This script will try switching to 'pip2', but your pip2 install might be broken too.
+This script will try switching to 'pip2.7', but your pip2.7 install might be broken too.
 
 "
-    PIP="pip2"
+    PIP="pip2.7"
 fi
 
 if ! "$PIP" --version >/dev/null 2>&1; then
@@ -155,9 +150,8 @@ parent_dirname="$(dirname "$1")"
 
 if [ ! -d "$parent_dirname" ]; then
     die "
-The parent directory of $1 ($parent_dirname) does not exist. Please specify a
-parent directory you can write to. $HOME/streisand-deps
-may be a good choice.
+The parent directory of $1 ($parent_dirname) does not exist. Please
+specify a parent directory you can write to. './venv' is a good choice.
 
 "
 fi
@@ -165,19 +159,27 @@ fi
 if [ ! -w "$parent_dirname" ]; then
     die "
 The parent directory of $1 ($parent_dirname) is not writable. Please specify a
-parent directory you can write to. $HOME/streisand-deps
-may be a good choice.
+parent directory you can write to. './venv' is a good choice.
 
 "
 fi
 
+# The virtualenv directory should be created from scratch. But if the
+# directory already exists *and* it looks like it was a virtualenv,
+# don't pester the user; just use "virtualenv --clear" to clean it out.
+
+# In any case, this script will not run "rm -rf $1", regardless of how
+# tempting.
+
 if [ -e "$1" ]; then
-    die "
-$1 already exists. Please specify a place for a
-new directory to be created. $HOME/streisand-deps
-is a good choice if it doesn't exist.
+    if [ ! -e "$1/bin/activate.csh" ]; then
+	die "
+The directory $1 already exists, and it does not appear to contain a
+Python virtualenv. Please specify a new directory to be
+created. './venv' is a good choice if it doesn't exist.
 
 "
+    fi
 fi
 
 sudo_pip () {
@@ -213,16 +215,16 @@ fi
 # In case we have a new virtualenv executable.
 hash -r
 
-if ! virtualenv --python=python2 $NO_SITE_PACKAGES "$1"; then
+if ! virtualenv --python=python2.7 --clear $NO_SITE_PACKAGES "$1"; then
     parent_dirname="$(dirname "$1")"
     echo "
 virtualenv failed to create directory '$1'
-using 'virtualenv --python=python2 $1'. Note that $1 must not exist, but
+using 'virtualenv --python=python2.7 $1'. Note that $1 must not exist, but
 its parent ($parent_dirname) must exist.
 
 The first argument, 'new-directory', must be somewhere you can write
-to. A good place may be $HOME/streisand-deps. If it already exists,
-please delete the directory, or use a different name.
+to. A good place is './venv'. If it already exists, please delete the
+directory, or use a different name.
 
 "
     exit 1
